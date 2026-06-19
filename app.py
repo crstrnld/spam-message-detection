@@ -6,8 +6,6 @@ from sklearn.preprocessing import LabelEncoder
 
 # Load dataset
 data = pd.read_csv("spam_data.csv")
-
-# Pastikan label string dan bersihkan kutip ganda
 data['label'] = data['label'].astype(str).str.replace('"','').str.strip()
 
 # Encode label
@@ -30,11 +28,15 @@ st.write("Aplikasi ini membaca file spam_data.csv dan menampilkan hasil prediksi
 predictions = model.predict(X_vec)
 probas = model.predict_proba(X_vec)
 
+# Mapping kelas
+class_map = {i: label for i, label in enumerate(le.classes_)}
+
 # Gabungkan hasil ke dataframe
 result_df = data.copy()
-result_df['predicted'] = [le.classes_[p] for p in predictions]
-result_df['prob_spam'] = probas[:, list(le.classes_).index('spam')]
-result_df['prob_ham'] = probas[:, list(le.classes_).index('ham')]
+result_df['predicted'] = [class_map[p] for p in predictions]
+
+for i, label in class_map.items():
+    result_df[f'prob_{label}'] = probas[:, i]
 
 # Tampilkan hasil
 st.subheader("Prediction Results")
