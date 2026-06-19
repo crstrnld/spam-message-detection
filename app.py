@@ -4,47 +4,34 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 
-# Judul aplikasi
-st.title("📩 Aplikasi Deteksi Pesan Spam Sederhana")
-
 # Load dataset
-@st.cache_data
-def load_data():
-    return pd.read_csv("spam_data.csv")
-
-data = load_data()
-
-st.subheader("Dataset")
-st.write(data.head())
-
-# Preprocessing
+data = pd.read_csv("spam_data.csv")  # kolom: 'text', 'label'
 X = data['text']
 y = data['label']
 
+# Vectorize text
 vectorizer = CountVectorizer()
-X_vectorized = vectorizer.fit_transform(X)
+X_vec = vectorizer.fit_transform(X)
 
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(
-    X_vectorized, y, test_size=0.2, random_state=42
-)
-
-# Model
+# Train model
+X_train, X_test, y_train, y_test = train_test_split(X_vec, y, test_size=0.2, random_state=42)
 model = MultinomialNB()
 model.fit(X_train, y_train)
 
-# Akurasi
-accuracy = model.score(X_test, y_test)
-st.write(f"📊 Akurasi model: {accuracy:.2f}")
+# Streamlit UI
+st.title("📩 Spam Message Detector")
+st.write("Masukkan pesan untuk cek apakah spam atau bukan:")
 
-# Input user
-st.subheader("Coba Deteksi Pesan")
-user_input = st.text_area("Masukkan teks pesan:")
+user_input = st.text_area("Message text")
 
-if st.button("Deteksi"):
-    if user_input.strip() != "":
-        user_vector = vectorizer.transform([user_input])
-        prediction = model.predict(user_vector)[0]
-        st.success(f"Hasil deteksi: **{prediction.upper()}**")
-    else:
-        st.warning("Silakan masukkan teks terlebih dahulu.")
+if st.button("Predict"):
+    input_vec = vectorizer.transform([user_input])
+    prediction = model.predict(input_vec)[0]
+    prediction_proba = model.predict_proba(input_vec)[0]
+
+    st.subheader("Prediction")
+    st.success("Spam" if prediction == 1 else "Not Spam")
+
+    st.subheader("Prediction Probability")
+    proba_df = pd.DataFrame([prediction_proba], columns=model.classes_)
+    st.table(proba_df)
