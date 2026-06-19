@@ -4,13 +4,12 @@ import os
 import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
 
 st.title("📨 SMS Spam Detection")
 
 @st.cache_data
 def load_data():
+    # Dataset format: label \t message
     df = pd.read_csv("SMSSpamCollection.txt", sep="\t", header=None, names=["label", "message"])
     return df
 
