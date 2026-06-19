@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 # Load dataset
 data = pd.read_csv("spam_data.csv")
 
-# Bersihkan label dari kutip ganda
+# Pastikan label string dan bersihkan kutip ganda
+data['label'] = data['label'].astype(str)
 data['label'] = data['label'].str.replace('"', '').str.strip()
 
 # Encode label ke angka
